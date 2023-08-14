@@ -1,66 +1,73 @@
-"use client";
+import React, { useState } from "react";
 
-import React, { useEffect, useState } from "react";
-import govData from "@/app/libs/gov_uk.json";
+export default function car({ co2 }) {
+  let dieselWellToTank = 2.58 + 0.62; // kg CO2/l
+  let petrolWellToTank = 2.3 + 0.5; // kg CO2/l
 
-export default function Car() {
-  const [busCO2, setBusCO2] = useState(null);
+  const calculateCO2 = (
+    distKm,
+    fuelType,
+    fuelConsumption,
+    electricityConsumption,
+    electricityCountryCode,
+    paxInCar,
+    tripType
+  ) => {
+    let grCO2Driving;
 
-  const [dist, setDist] = useState();
-  const [trip, setTrip] = useState();
+    if (fuelType === "electric") {
+      const kWhPer100km = parseInt(electricityConsumption) / 0.83; // We consider a grid-to-battery conversion efficiency of 83%
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+      const gCO2PerKWh = ciInCountry(electricityCountryCode);
 
-  const fetchData = async () => {
-    let data = await govData;
-    const co2 = data.gCO2.bus;
-    setBusCO2(co2);
-  };
+      grCO2Driving = Math.floor((kWhPer100km * gCO2PerKWh) / 100.0);
+    } else if (fuelType === "diesel" || fuelType === "petrol") {
+      const kgCO2PerLitre = {
+        diesel: dieselWellToTank,
+        petrol: petrolWellToTank,
+      };
 
-  const calculateCO2 = (dist, trip) => {
-    if (!busCO2) {
-      return null; // Handle the case when data is not yet loaded
+      grCO2Driving = Math.floor(
+        kgCO2PerLitre[fuelType] * parseFloat(fuelConsumption) * 10.0
+      );
+    } else {
+      console.log(
+        "fuelType value is not valid. It must be one of the following: ['electric', 'diesel', 'petrol']"
+      );
     }
 
-    const gCO2Km = busCO2.coach;
-    const grCO2Person = dist * gCO2Km;
+    let grCO2Person = grCO2Driving * distKm;
 
-    if (trip === "round-trip") {
-      return Math.floor(grCO2Person * 2);
+    if (tripType === "round-trip") {
+      grCO2Person *= 2;
     }
 
-    return Math.floor(grCO2Person);
+    if (parseInt(paxInCar) > 1) {
+      grCO2Person =
+        Math.floor(grCO2Person / paxInCar) + (grCO2Person % paxInCar > 0);
+    }
+
+    return grCO2Person;
   };
 
-  const updateDist = (e) => {
-    setDist(e.target.value);
+  const ciInCountry = (countryCode) => {
+    // Implement method to fetch and return carbon intensity based on country code
   };
 
-  const updateTrip = (e) => {
-    setTrip(e.target.value);
-  };
-
-  const handleSubmit = () => {
-    console.log(dist, trip);
-
-    let r = calculateCO2(dist, trip);
-    console.log({ r });
-  };
+  // Example usage
+  const emissions = calculateCO2(
+    150,
+    "diesel",
+    6.5,
+    20,
+    "DE",
+    2,
+    "round-trip"
+  );
 
   return (
     <div>
-      <input
-        placeholder="Distance in km"
-        onChange={(e) => updateDist(e)}
-      />
-      <input
-        placeholder="Single or Round trip"
-        onChange={(e) => updateTrip(e)}
-      />
-
-      <button onClick={() => handleSubmit()}>Submit</button>
+      <p>CO2 Emissions: {emissions}</p>
     </div>
   );
 }

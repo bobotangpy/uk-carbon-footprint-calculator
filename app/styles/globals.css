@@ -56,3 +56,27 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+.flexCol,
+.flexRow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px;
+}
+
+.flexCol {
+  flex-direction: column;
+}
+
+.flexRow {
+  flex-direction: row;
+}
+
+.btn {
+  margin: 12px;
+}
+
+.spacing {
+  margin: 15px;
+}
