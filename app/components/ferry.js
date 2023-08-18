@@ -1,10 +1,58 @@
-"use client"
+"use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import Box from "@mui/material/Box";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
+import FormLabel from "@mui/material/FormLabel";
 
 export default function Ferry({ co2 }) {
+  const [duration, setDuration] = useState();
+  const [vehicle, setVehicle] = useState();
+  const [trip, setTrip] = useState("single");
+  const [emission, setEmission] = useState();
+
+  const [hideDurationErr, setHideDurationErr] = useState(true);
+  const [hideTripErr, setHideTripErr] = useState(true);
+  const [hideVehicleErr, setHideVehicleErr] = useState(true);
 
   let avgSpeedKmh = 30;
+
+  const updateDuration = (e) => {
+    setDuration(e.target.value);
+    setHideDurationErr(true);
+  };
+
+  const updateVehicle = (e) => {
+    setVehicle(e.target.value);
+    setHideVehicleErr(true);
+  };
+
+  const updateTrip = (e) => {
+    setTrip(e.target.value);
+    setHideTripErr(true);
+  };
+
+  const handleSubmit = () => {
+    if (!duration ||!vehicle ||!trip) {
+      setHideDurationErr(false);
+      setHideVehicleErr(false);
+      setHideTripErr(false);
+      return;
+    }
+
+    const emissions = calculateCO2FromDuration(
+      duration,
+      vehicle,
+      trip
+    );
+
+    setEmission(emissions);
+  }
 
   const calculateCO2 = (distKm, vehicleFerry, tripType) => {
     const paxQty = 1;
@@ -43,14 +91,97 @@ export default function Ferry({ co2 }) {
   };
 
   // Example usage
-  const emissions = calculateCO2FromDuration(360, "with-vehicle", "round-trip");
+  // const emissions = calculateCO2FromDuration(360, "with-vehicle", "round-trip");
 
   return (
     // duration in minutes
     // with vehicle on ferry or not
     // trip type
-    <div>
-      <h1>CO2 Emissions: {emissions}</h1>
+    <div className="flexCol">
+      <Box
+        component="form"
+        sx={{
+          "& > :not(style)": { m: 1, width: "25ch" },
+        }}
+        noValidate
+        autoComplete="off"
+        className="spacing"
+      >
+        <TextField
+          id="outlined-basic"
+          label="Duration in minutes"
+          variant="outlined"
+          onChange={(e) => updateDuration(e)}
+        />
+      </Box>
+      <p className="error" hidden={hideDurationErr}>
+        Please enter the duration of the journey.
+      </p>
+
+      <FormControl className="spacing">
+        {/* <FormLabel id="vehicle-radio-buttons-group-label">Trip Type</FormLabel> */}
+        <RadioGroup
+          aria-labelledby="vehicle-radio-buttons-group-label"
+          name="controlled-radio-buttons-group"
+          value={vehicle}
+          onChange={updateVehicle}
+        >
+          <FormControlLabel
+            value="with-vehicle"
+            control={<Radio />}
+            label="with vehicle"
+          />
+          <FormControlLabel
+            value="on-foot"
+            control={<Radio />}
+            label="On foot"
+          />
+        </RadioGroup>
+
+        <p className="error" hidden={hideVehicleErr}>
+          Please select one option.
+        </p>
+      </FormControl>
+
+      <FormControl className="spacing">
+        <FormLabel id="trip-radio-buttons-group-label">Trip</FormLabel>
+        <RadioGroup
+          aria-labelledby="trip-radio-buttons-group-label"
+          name="controlled-radio-buttons-group"
+          value={trip}
+          onChange={updateTrip}
+        >
+          <FormControlLabel
+            value="single-trip"
+            control={<Radio />}
+            label="Single-trip"
+          />
+          <FormControlLabel
+            value="round-trip"
+            control={<Radio />}
+            label="Round-trip"
+          />
+        </RadioGroup>
+
+        <p className="error" hidden={hideTripErr}>
+          Please select trip type.
+        </p>
+      </FormControl>
+
+      <Button
+        className="btn spacing"
+        variant="contained"
+        onClick={() => handleSubmit()}
+      >
+        Submit
+      </Button>
+
+      {emission && (
+        <div className="resContainer flexCol spacing">
+          <h3>CO2 equivalent emission of your ride:</h3>
+          <h3>{emission} grams</h3>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -50,7 +50,6 @@ export default function Bus({ co2 }) {
 
   return (
     <div className="flexCol">
-      <h2>CO2 emission of a bus ride</h2>
       <Box
         component="form"
         sx={{
@@ -98,7 +97,7 @@ export default function Bus({ co2 }) {
       </Button>
 
       {emission && (
-        <div className="flexCol spacing">
+        <div className="resContainer flexCol spacing">
           <h3>CO2 equivalent emission of your ride:</h3>
           <h3>{emission} grams</h3>
         </div>

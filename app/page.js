@@ -13,10 +13,14 @@ import airportData from "@/app/libs/airport.json";
 import HouseholdEnergy from "./components/householdEnergy";
 import Bus from "./components/bus";
 import Flights from "./components/flight";
+import Ferry from "./components/ferry";
+import Loading from "./components/loading";
 
 export default function Home() {
+  const [loading, setLoading] = useState(true);
   const [value, setValue] = useState(0);
   const [airportList, setAirportList] = useState(null);
+  const [airportsDetails, setAirportsDetails] = useState(null);
 
   const [busCO2, setBusCO2] = useState(null);
   const [flightCO2, setFlightCO2] = useState(null);
@@ -28,6 +32,10 @@ export default function Home() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (ferryCO2) setLoading(false);
+  }, [ferryCO2]);
+
   const fetchData = async () => {
     let data = await govData;
     const co2 = data.gCO2;
@@ -38,16 +46,15 @@ export default function Home() {
     setFerryCO2(co2.ferry);
 
     let apData = await airportData;
-    // console.log(Object.values(apData.airports));
-      let list = await Object.values(apData.airports);
-      let listArr = [];
-      await list.map((airport) => {
-    // console.log(airport.name);
-        listArr.push(`${airport.name} (${airport.iata_code})`);
-      });
+    let list = await Object.values(apData.airports);
+    let listArr = [];
+    await list.map((airport) => {
+      listArr.push(`${airport.name} (${airport.iata_code})`);
+    });
 
-      setAirportList(listArr.sort());
-    }
+    setAirportsDetails(list);
+    setAirportList(listArr.sort());
+  };
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -67,7 +74,7 @@ export default function Home() {
         {value === index && (
           <Box sx={{ p: 3 }}>
             {/* <Typography> */}
-              {children}
+            {children}
             {/* </Typography> */}
           </Box>
         )}
@@ -94,8 +101,10 @@ export default function Home() {
         Carbon Footprint Calculator
       </h1>
 
-      <div className="tabs-container">
-        {ferryCO2 ? (
+      {loading ? (
+        <Loading />
+      ) : (
+        <div className="tabs-container">
           <Box sx={{ width: "100%" }}>
             <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
               <Tabs
@@ -119,7 +128,11 @@ export default function Home() {
               Car
             </CustomTabPanel>
             <CustomTabPanel value={value} index={2}>
-              <Flights co2={flightCO2} airportList={airportList} />
+              <Flights
+                co2={flightCO2}
+                airportList={airportList}
+                airportsDetails={airportsDetails}
+              />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={3}>
               Motorbike
@@ -131,18 +144,11 @@ export default function Home() {
               Train
             </CustomTabPanel>
             <CustomTabPanel value={value} index={6}>
-              Ferry
+              <Ferry co2={ferryCO2} />
             </CustomTabPanel>
           </Box>
-        ) : (
-          <Skeleton
-            sx={{ bgcolor: "grey.900" }}
-            variant="rectangular"
-            width={210}
-            height={118}
-          />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

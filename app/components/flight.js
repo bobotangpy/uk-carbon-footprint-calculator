@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import airportData from "@/app/libs/airport.json";
+import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -12,54 +11,67 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 
-export default function Flights({ co2, airportList }) {
-  // const [airportList, setAirportList] = useState(null);
+export default function Flights({ co2, airportList, airportsDetails }) {
   const [cabinClass, setCabinClass] = useState();
+  const [origin, setOrigin] = useState();
+  const [destination, setDestination] = useState();
   const [duration, setDuration] = useState();
   const [trip, setTrip] = useState();
   const [emission, setEmission] = useState();
+
+  const [hideTripErr, setHideTripErr] = useState(true);
+  const [hideDistanceErr, setHideDistanceErr] = useState(true);
+  const [hideCabinErr, setHideCabinErr] = useState(true);
 
   let domesticFlightMaxKm = 400;
   let shortHaulMaxKm = 3700;
   let detourConstant = 95; // km
 
-  useEffect(() => {
-    // fetchData();
-    console.log(airportList);
-  }, []);
-
-  // const fetchData = async () => {
-  //   let data = await airportData;
-
-  //   if (data.length > 0) {
-  //     let list = Object.values(data.airports);
-  //     let listArr = [];
-  //     list.forEach.map((airport) => {
-  //       listArr.push(airport.name);
-  //     });
-
-  //     setAirportList(listArr);
-  //   }
-  // };
-
-  const updateOrigin = (e) => {
-    console.log(e.target.value);
+  const updateOrigin = (val) => {
+    setOrigin(val);
+    if (destination) setHideDistanceErr(true);
   };
 
-  const updateDestination = (e) => {
-    console.log(e.target.value);
+  const updateDestination = (val) => {
+    setDestination(val);
+    if (origin) setHideDistanceErr(true);
   };
 
   const updateDuration = (e) => {
     setDuration(e.target.value);
+    setHideDistanceErr(true);
   };
 
   const updateClass = (e) => {
     setCabinClass(e.target.value);
+    setHideCabinErr(true);
   };
 
   const updateTrip = (e) => {
     setTrip(e.target.value);
+    setHideTripErr(true);
+  };
+
+  const handleSubmit = () => {
+    if (!trip) return setHideTripErr(false);
+
+    if (duration === null || (origin === null && destination === null)) {
+      return setHideDistanceErr(false);
+    }
+
+    if (!cabinClass) return setHideCabinErr(false);
+
+    if (duration) {
+      let co2 = calculateCO2FromDuration(duration, cabinClass, trip);
+      setEmission(co2);
+    }
+
+    if (origin && destination) {
+      let iataOrigin = origin.split("(")[1].slice(0, -1);
+      let iataDestination = destination.split("(")[1].slice(0, -1);
+      let co2 = calculateCO2FromAirports(iataOrigin, iataDestination, cabinClass, trip);
+      setEmission(co2);
+    }
   };
 
   const calculateCO2 = (distKm, paxClass, tripType) => {
@@ -85,7 +97,11 @@ export default function Flights({ co2, airportList }) {
       grCO2Person *= 2;
     }
 
-    return Math.floor(grCO2Person);
+    let grams = Math.floor(grCO2Person);
+
+    // 1 tonne = 1000000 grams
+    const tonnes = grams / 1000000;
+    return tonnes;
   };
 
   const calculateCO2FromAirports = (iataOrig, iataDest, paxClass, tripType) => {
@@ -125,14 +141,14 @@ export default function Flights({ co2, airportList }) {
 
   // Calculate real distance between airports in km, given two airport as iata codes (3-digit code).
   const realDistance = (iataOrig, iataDest) => {
-    const origAirportDict = airportList[iataOrig];
-    const destAirportDict = airportList[iataDest];
+    const origAirportObj = airportsDetails.find((a) => a.iata_code === iataOrig);
+    const destAirportObj = airportsDetails.find((a) => a.iata_code === iataDest);
 
     const distM = haversine(
-      parseAirportLat(origAirportDict),
-      parseAirportLon(origAirportDict),
-      parseAirportLat(destAirportDict),
-      parseAirportLon(destAirportDict)
+      parseAirportLat(origAirportObj),
+      parseAirportLon(origAirportObj),
+      parseAirportLat(destAirportObj),
+      parseAirportLon(destAirportObj)
     );
 
     const distKm = Math.floor(distM / 1000) + detourConstant;
@@ -174,24 +190,20 @@ export default function Flights({ co2, airportList }) {
     return meters;
   };
 
-  const parseAirportLat = () => {
-    const airportCoordinates = parseAirportCoordinates(airportList);
+  const parseAirportLat = (airportObj) => {
+    const airportCoordinates = parseAirportCoordinates(airportObj);
     return airportCoordinates[1];
   };
 
-  const parseAirportLon = () => {
-    const airportCoordinates = parseAirportCoordinates(airportList);
+  const parseAirportLon = (airportObj) => {
+    const airportCoordinates = parseAirportCoordinates(airportObj);
     return airportCoordinates[0];
   };
 
-  const parseAirportCoordinates = () => {
-    const airportCoordinates = airportList["lonlat"];
+  const parseAirportCoordinates = (airportObj) => {
+    const airportCoordinates = airportObj["lonlat"];
     return airportCoordinates;
   };
-
-  // Example usage
-  const emissions = calculateCO2(1000, "business-class", "round-trip");
-  console.log("CO2 Emissions:", emissions);
 
   return (
     // trip type
@@ -199,12 +211,10 @@ export default function Flights({ co2, airportList }) {
     // duration in minutes
     // class of passenger (business-class or economy-class)
     <div className="flexCol">
-      <h2>CO2 emission of a flight</h2>
-
       <FormControl className="spacing">
-        <FormLabel id="demo-radio-buttons-group-label">Trip Type</FormLabel>
+        <FormLabel id="trip-radio-buttons-group-label">Trip Type</FormLabel>
         <RadioGroup
-          aria-labelledby="demo-radio-buttons-group-label"
+          aria-labelledby="trip-radio-buttons-group-label"
           name="controlled-radio-buttons-group"
           value={trip}
           onChange={updateTrip}
@@ -216,6 +226,10 @@ export default function Flights({ co2, airportList }) {
           />
           <FormControlLabel value="round" control={<Radio />} label="Return" />
         </RadioGroup>
+
+        <p className="error" hidden={hideTripErr}>
+          Please select trip type.
+        </p>
       </FormControl>
 
       <div className="flexRow">
@@ -233,6 +247,7 @@ export default function Flights({ co2, airportList }) {
             id="combo-box-demo"
             options={airportList ? airportList : []}
             sx={{ width: 900 }}
+            onChange={(event, value) => updateOrigin(value)}
             renderOption={(props, option) => (
               <Box component="li" {...props} key={`${option}_1`}>
                 {option}
@@ -242,7 +257,7 @@ export default function Flights({ co2, airportList }) {
               <TextField
                 {...params}
                 variant="outlined"
-                onChange={(e) => updateOrigin(e)}
+                // onChange={(e) => updateOrigin(e)}
                 label="Leaving from"
               />
             )}
@@ -252,11 +267,12 @@ export default function Flights({ co2, airportList }) {
             id="combo-box-demo"
             options={airportList ? airportList : []}
             sx={{ width: 900 }}
+            onChange={(event, value) => updateDestination(value)}
             renderInput={(params) => (
               <TextField
                 {...params}
                 variant="outlined"
-                onChange={(e) => updateDestination(e)}
+                // onChange={(e) => updateDestination(e)}
                 label="Going to"
               />
             )}
@@ -273,12 +289,16 @@ export default function Flights({ co2, airportList }) {
         onChange={(e) => updateDuration(e)}
       />
 
+      <p className="error" hidden={hideDistanceErr}>
+        Please enter origin and destination <i>OR</i> duration of the flight.
+      </p>
+
       <FormControl className="spacing">
-        <FormLabel id="demo-radio-buttons-group-label">Cabin Class</FormLabel>
+        <FormLabel id="cabinClass-radio-buttons-group-label">Cabin Class</FormLabel>
         <RadioGroup
-          aria-labelledby="demo-radio-buttons-group-label"
+          aria-labelledby="cabinClass-radio-buttons-group-label"
           name="controlled-radio-buttons-group"
-          value={trip}
+          value={cabinClass}
           onChange={updateClass}
         >
           <FormControlLabel
@@ -292,6 +312,10 @@ export default function Flights({ co2, airportList }) {
             label="Business Class"
           />
         </RadioGroup>
+
+        <p className="error" hidden={hideCabinErr}>
+          Please select cabin class.
+        </p>
       </FormControl>
 
       <Button
@@ -303,9 +327,9 @@ export default function Flights({ co2, airportList }) {
       </Button>
 
       {emission && (
-        <div className="flexCol spacing">
+        <div className="resContainer flexCol spacing">
           <h3>CO2 equivalent emission of your flight:</h3>
-          <h3>{emission} grams</h3>
+          <h2>{emission} tonnes</h2>
         </div>
       )}
     </div>
