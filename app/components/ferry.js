@@ -11,9 +11,9 @@ import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 
 export default function Ferry({ co2 }) {
-  const [duration, setDuration] = useState();
-  const [vehicle, setVehicle] = useState();
-  const [trip, setTrip] = useState("single");
+  const [duration, setDuration] = useState("");
+  const [vehicle, setVehicle] = useState("on-foot");
+  const [trip, setTrip] = useState("round-trip");
   const [emission, setEmission] = useState();
 
   const [hideDurationErr, setHideDurationErr] = useState(true);
@@ -111,6 +111,8 @@ export default function Ferry({ co2 }) {
           id="outlined-basic"
           label="Duration in minutes"
           variant="outlined"
+          type="number"
+          inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
           onChange={(e) => updateDuration(e)}
         />
       </Box>

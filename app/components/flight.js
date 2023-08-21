@@ -12,11 +12,11 @@ import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 
 export default function Flights({ co2, airportList, airportsDetails }) {
-  const [cabinClass, setCabinClass] = useState();
-  const [origin, setOrigin] = useState();
-  const [destination, setDestination] = useState();
+  const [cabinClass, setCabinClass] = useState("economy-class");
+  const [origin, setOrigin] = useState("");
+  const [destination, setDestination] = useState("");
   const [duration, setDuration] = useState();
-  const [trip, setTrip] = useState();
+  const [trip, setTrip] = useState("round");
   const [emission, setEmission] = useState();
 
   const [hideTripErr, setHideTripErr] = useState(true);
@@ -272,7 +272,6 @@ export default function Flights({ co2, airportList, airportsDetails }) {
               <TextField
                 {...params}
                 variant="outlined"
-                // onChange={(e) => updateDestination(e)}
                 label="Going to"
               />
             )}
@@ -285,6 +284,7 @@ export default function Flights({ co2, airportList, airportsDetails }) {
         id="outlined-basic"
         label="Duration of flight in minutes"
         variant="outlined"
+        type="number"
         style={{ width: "30ch" }}
         onChange={(e) => updateDuration(e)}
       />

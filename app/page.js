@@ -1,19 +1,19 @@
 "use client";
 
-import styles from "./styles/page.module.css";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import Skeleton from "@mui/material/Skeleton";
+import styles from "./styles/page.module.css";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import Typography from "@mui/material/Typography";
+// import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import { useEffect, useState } from "react";
 import govData from "@/app/libs/gov_uk.json";
 import airportData from "@/app/libs/airport.json";
 import HouseholdEnergy from "./components/householdEnergy";
 import Bus from "./components/bus";
 import Flights from "./components/flight";
 import Ferry from "./components/ferry";
+import Car from "./components/car";
 import Loading from "./components/loading";
 
 export default function Home() {
@@ -125,7 +125,7 @@ export default function Home() {
               <HouseholdEnergy />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-              Car
+              <Car co2={carCO2} />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={2}>
               <Flights

@@ -63,14 +63,16 @@ export default function Bus({ co2 }) {
           id="outlined-basic"
           label="Distance in km"
           variant="outlined"
+          type="number"
+          inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
           onChange={(e) => updateDist(e)}
         />
       </Box>
 
       <FormControl className="spacing">
-        <FormLabel id="demo-radio-buttons-group-label">Trip</FormLabel>
+        <FormLabel id="trip-radio-buttons-group-label">Trip</FormLabel>
         <RadioGroup
-          aria-labelledby="demo-radio-buttons-group-label"
+          aria-labelledby="trip-radio-buttons-group-label"
           name="controlled-radio-buttons-group"
           value={trip}
           onChange={updateTrip}
