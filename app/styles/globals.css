@@ -94,3 +94,7 @@ a {
 .resContainer h3, .resContainer h2{
   margin: 10px 0;
 }
+
+.css-heg063-MuiTabs-flexContainer {
+  justify-content: center;
+}

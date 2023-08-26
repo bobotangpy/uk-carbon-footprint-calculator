@@ -5,13 +5,21 @@ import PropTypes from "prop-types";
 import styles from "./styles/page.module.css";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import HomeIcon from '@mui/icons-material/Home';
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
+import FlightIcon from '@mui/icons-material/Flight';
+import TrainIcon from '@mui/icons-material/Train';
+import DirectionsBoatIcon from '@mui/icons-material/DirectionsBoat';
 // import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import govData from "@/app/libs/gov_uk.json";
 import airportData from "@/app/libs/airport.json";
+import loadFactors from "@/app/libs/loadfactors.json";
 import HouseholdEnergy from "./components/householdEnergy";
 import Bus from "./components/bus";
-import Flights from "./components/flight";
+// import Flights from "./components/flight";
+import Flights2 from "./components/flight2";
 import Ferry from "./components/ferry";
 import Car from "./components/car";
 import Loading from "./components/loading";
@@ -21,6 +29,7 @@ export default function Home() {
   const [value, setValue] = useState(0);
   const [airportList, setAirportList] = useState(null);
   const [airportsDetails, setAirportsDetails] = useState(null);
+  const [loadFactorsData, setLoadFactorsData] = useState(null);
 
   const [busCO2, setBusCO2] = useState(null);
   const [flightCO2, setFlightCO2] = useState(null);
@@ -33,8 +42,8 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (ferryCO2) setLoading(false);
-  }, [ferryCO2]);
+    if (loadFactorsData) setLoading(false);
+  }, [loadFactorsData]);
 
   const fetchData = async () => {
     let data = await govData;
@@ -51,6 +60,9 @@ export default function Home() {
     await list.map((airport) => {
       listArr.push(`${airport.name} (${airport.iata_code})`);
     });
+
+    let factorsData = await loadFactors;
+    setLoadFactorsData(factorsData);
 
     setAirportsDetails(list);
     setAirportList(listArr.sort());
@@ -97,7 +109,7 @@ export default function Home() {
 
   return (
     <div className="main">
-      <h1 style={{ textAlign: "center", marginBottom: "50px" }}>
+      <h1 style={{ textAlign: "center", margin: "30px 20px 50px" }}>
         Carbon Footprint Calculator
       </h1>
 
@@ -112,13 +124,13 @@ export default function Home() {
                 onChange={handleChange}
                 aria-label="Carbon Footprint Calculator tabs"
               >
-                <Tab label="Household Energy" {...a11yProps(0)} />
-                <Tab label="Car" {...a11yProps(1)} />
-                <Tab label="Flights" {...a11yProps(2)} />
-                <Tab label="Motorbike" {...a11yProps(3)} />
-                <Tab label="Bus" {...a11yProps(4)} />
-                <Tab label="Train" {...a11yProps(5)} />
-                <Tab label="Ferry" {...a11yProps(6)} />
+                <Tab label="Household Energy" icon={<HomeIcon />} iconPosition="start" {...a11yProps(0)} />
+                <Tab label="Car" icon={<DirectionsCarIcon />} iconPosition="start" {...a11yProps(1)} />
+                <Tab label="Flights" icon={<FlightIcon />} iconPosition="start" {...a11yProps(2)} />
+                {/* <Tab label="Motorbike" {...a11yProps(3)} /> */}
+                <Tab label="Bus" icon={<DirectionsBusIcon />} iconPosition="start" {...a11yProps(3)} />
+                <Tab label="Train" icon={<TrainIcon />} iconPosition="start" {...a11yProps(4)} />
+                <Tab label="Ferry" icon={<DirectionsBoatIcon />} iconPosition="start" {...a11yProps(5)} />
               </Tabs>
             </Box>
             <CustomTabPanel value={value} index={0}>
@@ -128,22 +140,28 @@ export default function Home() {
               <Car co2={carCO2} />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={2}>
-              <Flights
+              {/* <Flights
                 co2={flightCO2}
                 airportList={airportList}
                 airportsDetails={airportsDetails}
+              /> */}
+              <Flights2
+                co2={flightCO2}
+                airportList={airportList}
+                airportsDetails={airportsDetails}
+                loadFactorsData={loadFactorsData}
               />
             </CustomTabPanel>
-            <CustomTabPanel value={value} index={3}>
+            {/* <CustomTabPanel value={value} index={3}>
               Motorbike
-            </CustomTabPanel>
-            <CustomTabPanel value={value} index={4}>
+            </CustomTabPanel> */}
+            <CustomTabPanel value={value} index={3}>
               <Bus co2={busCO2} />
             </CustomTabPanel>
-            <CustomTabPanel value={value} index={5}>
+            <CustomTabPanel value={value} index={4}>
               Train
             </CustomTabPanel>
-            <CustomTabPanel value={value} index={6}>
+            <CustomTabPanel value={value} index={5}>
               <Ferry co2={ferryCO2} />
             </CustomTabPanel>
           </Box>
