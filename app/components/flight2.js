@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -400,7 +400,7 @@ export default function Flights2({
       /> */}
 
       <p className="error" hidden={hideDistanceErr}>
-        Please enter origin and destination <i>OR</i> duration of the flight.
+        Please enter origin and destination of the flight.
       </p>
 
       <FormControl className="spacing">

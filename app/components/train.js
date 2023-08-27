@@ -1,155 +1,151 @@
 "use client";
 
-import React, { useState } from "react";
-import carbonIntensityData from "@/app/libs/ci_by_source.json";
-import electricityMixesData from "@/app/libs/electricity_mixes.json";
+import React, { useEffect, useState } from "react";
+// import carbonIntensityData from "@/app/libs/ci_by_source.json";
+// import electricityMixesData from "@/app/libs/electricity_mixes.json";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
+import Autocomplete from "@mui/material/Autocomplete";
 import Button from "@mui/material/Button";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
+import { geoDistance } from "d3-geo";
 
-export default function Train() {
-  const [carbonIntensity, setCarbonIntensity] = useState(null);
-  const [electricityMixes, setElectricityMixesData] = useState(null);
+export default function Train({ trainStationsData }) {
+  const [stationList, setStationList] = useState("");
+  const [origin, setOrigin] = useState("");
+  const [destination, setDestination] = useState("");
+  const [trip, setTrip] = useState("single");
   const [emission, setEmission] = useState();
 
-  const [hideDurationErr, setHideDurationErr] = useState(true);
+  const [hideLocationErr, setHideLocationErr] = useState(true);
   const [hideTripErr, setHideTripErr] = useState(true);
-  const [hideVehicleErr, setHideVehicleErr] = useState(true);
 
-  let grCo2Diesel = 74; // source = https://www.railplus.com.au/pdfs/ATOC-rail-is-greener-report.pdf
-  let electricConsumption = 0.108; // kWh / pkm for electric trains. Source: https://www.railplus.com.au/pdfs/ATOC-rail-is-greener-report.pdf
+  const kgCO2perKm = 0.0351; // source: https://www.thetrainline.com/sustainable-travel (Train = National Rail 0.0351 kg CO2/passenger km)
+
+  // TODO: use train station data to calculate distance in km => km * kgCO2perKm
+
+  // let grCo2Diesel = 74; // source = https://www.railplus.com.au/pdfs/ATOC-rail-is-greener-report.pdf
+  // let electricConsumption = 0.108; // kWh / pkm for electric trains. Source: https://www.railplus.com.au/pdfs/ATOC-rail-is-greener-report.pdf
 
   useEffect(() => {
-    fetchData();
+    if (trainStationsData) {
+      let listArr = [];
+
+      trainStationsData.map((item) => {
+        listArr.push(`${item.station_name} (${item["3alpha"]})`);
+      });
+
+      setStationList(listArr);
+    }
   }, []);
 
-  const fetchData = async () => {
-    let ciData = await carbonIntensityData;
-    setCarbonIntensity(ciData);
-
-    let emData = await electricityMixesData;
-    setElectricityMixesData(emData);
+  const updateOrigin = (val) => {
+    setOrigin(val);
+    if (destination) setHideLocationErr(true);
   };
 
-  const calculateCO2 = (distKm, trainEnergy, trainCountry, tripType) => {
-    let grCo2;
+  const updateDestination = (val) => {
+    setDestination(val);
+    if (origin) setHideLocationErr(true);
+  };
 
-    if (trainEnergy === "electric") {
-      grCo2 = electricRailEmissions(trainCountry);
-    } else {
-      grCo2 = grCo2Diesel;
-    }
+  const updateTrip = (e) => {
+    setTrip(e.target.value);
+    setHideTripErr(true);
+  };
 
-    let grCo2Person = Math.floor(grCo2 * distKm);
+  const handleSubmit = () => {
+    if (!origin) return setHideLocationErr(false);
+    if (!destination) return setHideLocationErr(false);
+    if (!trip) return setHideTripErr(false);
+
+    let originCode = origin.split("(")[1].slice(0, -1);
+    let destinationCode = destination.split("(")[1].slice(0, -1);
+
+    calculateCO2(originCode, destinationCode, trip);
+  };
+
+  const calculateDistance = (origin, destination) => {
+    const originObj = trainStationsData.find((t) => t["3alpha"] === origin);
+    const destObj = trainStationsData.find((t) => t["3alpha"] === destination);
+
+    return geoDistance(
+      [originObj["longitude"], originObj["latitude"]],
+      [destObj["longitude"], destObj["latitude"]]
+    ) * 6371; // To convert great-arc distance (in radians) into km.
+  };
+
+  const calculateCO2 = (origin, destination, tripType) => {
+    let distKm = calculateDistance(origin, destination);
+
+    let grCo2Person = Math.floor(kgCO2perKm * distKm);
 
     if (tripType === "round-trip") {
       grCo2Person *= 2;
     }
 
-    return grCo2Person;
+    setEmission(grCo2Person);
   };
-
-  // Return gr CO2 / pkm for electric trains depending on the country
-  const electricRailEmissions = (countryCode) => {
-    let gCo2PerKWh;
-
-    if (countryCode === "DE") {
-      // gCO2_per_kWh = 230 #2019 #https://www.deutschebahn.com/resource/blob/5029910/5bdee6f2cac4fc869ad491d141539be9/Integrierter-Bericht-2019-data.pdf
-
-      gCo2PerKWh = calculateCiInGrid("deutsche-bahn");
-    } else if (countryCode === "AT") {
-      // gCO2_per_kWh = 59 # See https://docs.google.com/spreadsheets/d/1gxMfqTNyyo8oJEU3__MqZ68T97Hl0466mDHsCTvGbE0
-      gCo2PerKWh = calculateCiInGrid("oebb");
-    } else {
-      // Spain is 80% electric and 20% diesel: https://www.renfe.com/es/es/grupo-renfe/transporte-sostenible/eficiencia-energetica.html
-      gCo2PerKWh = ciInCountry(countryCode);
-    }
-
-    const carbonEmissions = electricConsumption * gCo2PerKWh;
-
-    return carbonEmissions;
-  };
-
-  const calculateCiInGrid = (gridName) => {
-    const eMix = electricityMixPerc(gridName);
-    const ciBySourceDict = carbonIntensity["energySource"];
-
-    let ciGrid = 0;
-
-    for (const [energySource, percent] of Object.entries(eMix)) {
-      const ciThisSource = ciBySourceDict[energySource] * (percent / 100);
-      ciGrid += ciThisSource;
-    }
-
-    return ciGrid;
-  };
-
-  const electricityMixPerc = (gridName) => {
-    let e_grids = electricityMixes["electricityGrid"];
-    let this_grid =
-      e_grids.find((item) => item["gridOwner"] === gridName) || null;
-    let e_mix = this_grid["electricityMix"];
-
-    return e_mix;
-  };
-
-  // Example usage
-  // const emissions = calculateCO2(200, "electric", "DE", "round-trip");
 
   return (
-    // distKm
-    // trainEnergy type 
-    // where do they take the train 
-    // tripType
     <div className="flexCol">
-      <Box
-        component="form"
-        sx={{
-          "& > :not(style)": { m: 1, width: "25ch" },
-        }}
-        noValidate
-        autoComplete="off"
-        className="spacing"
-      >
-        <TextField
-          id="outlined-basic"
-          label="Duration in minutes"
-          variant="outlined"
-          onChange={(e) => updateDuration(e)}
-        />
-      </Box>
-      <p className="error" hidden={hideDurationErr}>
-        Please enter the duration of the journey.
-      </p>
-
-      <FormControl className="spacing">
-        <RadioGroup
-          aria-labelledby="vehicle-radio-buttons-group-label"
-          name="controlled-radio-buttons-group"
-          value={vehicle}
-          onChange={updateVehicle}
+      <div className="flexRow">
+        <Box
+          component="form"
+          sx={{
+            "& > :not(style)": { m: 1, width: "30ch" },
+          }}
+          noValidate
+          autoComplete="on"
+          className="spacing"
         >
-          <FormControlLabel
-            value="with-vehicle"
-            control={<Radio />}
-            label="with vehicle"
+          <Autocomplete
+            disablePortal
+            id="combo-box-trainStations"
+            options={stationList ? stationList : []}
+            sx={{ width: 900 }}
+            onChange={(event, value) => updateOrigin(value)}
+            renderOption={(props, option) => (
+              <Box component="li" {...props} key={`${option}_1`}>
+                {option}
+              </Box>
+            )}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="outlined"
+                label="Origin station"
+              />
+            )}
           />
-          <FormControlLabel
-            value="on-foot"
-            control={<Radio />}
-            label="On foot"
+          <Autocomplete
+            disablePortal
+            id="combo-box-trainStations"
+            options={stationList ? stationList : []}
+            sx={{ width: 900 }}
+            onChange={(event, value) => updateDestination(value)}
+            renderOption={(props, option) => (
+              <Box component="li" {...props} key={`${option}_1`}>
+                {option}
+              </Box>
+            )}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="outlined"
+                label="Destination station"
+              />
+            )}
           />
-        </RadioGroup>
-
-        <p className="error" hidden={hideVehicleErr}>
-          Please select one option.
-        </p>
-      </FormControl>
+        </Box>
+      </div>
+      <p className="error" hidden={hideLocationErr}>
+        Please enter both origin station and destination station.
+      </p>
 
       <FormControl className="spacing">
         <FormLabel id="trip-radio-buttons-group-label">Trip</FormLabel>
@@ -187,7 +183,7 @@ export default function Train() {
       {emission && (
         <div className="resContainer flexCol spacing">
           <h3>CO2 equivalent emission of your ride:</h3>
-          <h3>{emission} grams</h3>
+          <h3>{emission} kg</h3>
         </div>
       )}
     </div>

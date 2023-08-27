@@ -5,23 +5,25 @@ import PropTypes from "prop-types";
 import styles from "./styles/page.module.css";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import HomeIcon from '@mui/icons-material/Home';
-import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
-import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
-import FlightIcon from '@mui/icons-material/Flight';
-import TrainIcon from '@mui/icons-material/Train';
-import DirectionsBoatIcon from '@mui/icons-material/DirectionsBoat';
+import HomeIcon from "@mui/icons-material/Home";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
+import FlightIcon from "@mui/icons-material/Flight";
+import TrainIcon from "@mui/icons-material/Train";
+import DirectionsBoatIcon from "@mui/icons-material/DirectionsBoat";
 // import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import govData from "@/app/libs/gov_uk.json";
 import airportData from "@/app/libs/airport.json";
 import loadFactors from "@/app/libs/loadfactors.json";
+import trainStations from "@/app/libs/uk-train-stations.json";  //https://github.com/ellcom/UK-Train-Station-Locations
 import HouseholdEnergy from "./components/householdEnergy";
 import Bus from "./components/bus";
 // import Flights from "./components/flight";
 import Flights2 from "./components/flight2";
 import Ferry from "./components/ferry";
 import Car from "./components/car";
+import Train from "./components/train";
 import Loading from "./components/loading";
 
 export default function Home() {
@@ -30,6 +32,7 @@ export default function Home() {
   const [airportList, setAirportList] = useState(null);
   const [airportsDetails, setAirportsDetails] = useState(null);
   const [loadFactorsData, setLoadFactorsData] = useState(null);
+  const [trainStationsData, setTrainStationsData] = useState(null);
 
   const [busCO2, setBusCO2] = useState(null);
   const [flightCO2, setFlightCO2] = useState(null);
@@ -54,6 +57,7 @@ export default function Home() {
     setCarCO2(co2.car);
     setFerryCO2(co2.ferry);
 
+    // Flights related
     let apData = await airportData;
     let list = await Object.values(apData.airports);
     let listArr = [];
@@ -66,6 +70,10 @@ export default function Home() {
 
     setAirportsDetails(list);
     setAirportList(listArr.sort());
+
+    // Train related
+    let trainData = await trainStations;
+    setTrainStationsData(trainData);
   };
 
   const handleChange = (event, newValue) => {
@@ -124,13 +132,43 @@ export default function Home() {
                 onChange={handleChange}
                 aria-label="Carbon Footprint Calculator tabs"
               >
-                <Tab label="Household Energy" icon={<HomeIcon />} iconPosition="start" {...a11yProps(0)} />
-                <Tab label="Car" icon={<DirectionsCarIcon />} iconPosition="start" {...a11yProps(1)} />
-                <Tab label="Flights" icon={<FlightIcon />} iconPosition="start" {...a11yProps(2)} />
+                <Tab
+                  label="Household Energy"
+                  icon={<HomeIcon />}
+                  iconPosition="start"
+                  {...a11yProps(0)}
+                />
+                <Tab
+                  label="Car"
+                  icon={<DirectionsCarIcon />}
+                  iconPosition="start"
+                  {...a11yProps(1)}
+                />
+                <Tab
+                  label="Flights"
+                  icon={<FlightIcon />}
+                  iconPosition="start"
+                  {...a11yProps(2)}
+                />
                 {/* <Tab label="Motorbike" {...a11yProps(3)} /> */}
-                <Tab label="Bus" icon={<DirectionsBusIcon />} iconPosition="start" {...a11yProps(3)} />
-                <Tab label="Train" icon={<TrainIcon />} iconPosition="start" {...a11yProps(4)} />
-                <Tab label="Ferry" icon={<DirectionsBoatIcon />} iconPosition="start" {...a11yProps(5)} />
+                <Tab
+                  label="Bus"
+                  icon={<DirectionsBusIcon />}
+                  iconPosition="start"
+                  {...a11yProps(3)}
+                />
+                <Tab
+                  label="Train"
+                  icon={<TrainIcon />}
+                  iconPosition="start"
+                  {...a11yProps(4)}
+                />
+                <Tab
+                  label="Ferry"
+                  icon={<DirectionsBoatIcon />}
+                  iconPosition="start"
+                  {...a11yProps(5)}
+                />
               </Tabs>
             </Box>
             <CustomTabPanel value={value} index={0}>
@@ -159,7 +197,7 @@ export default function Home() {
               <Bus co2={busCO2} />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={4}>
-              Train
+              <Train trainStationsData={trainStationsData} />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={5}>
               <Ferry co2={ferryCO2} />

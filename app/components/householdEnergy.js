@@ -1,5 +1,9 @@
 "use client";
 
 export default function HouseholdEnergy() {
-  return <div></div>;
+  return (
+    <div>
+      <p>Coming soon...</p>
+    </div>
+  );
 }
