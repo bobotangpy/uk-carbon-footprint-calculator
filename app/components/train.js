@@ -13,6 +13,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import { geoDistance } from "d3-geo";
+import PlantTrees from "./plantTrees";
 
 export default function Train({ trainStationsData }) {
   const [stationList, setStationList] = useState("");
@@ -20,13 +21,12 @@ export default function Train({ trainStationsData }) {
   const [destination, setDestination] = useState("");
   const [trip, setTrip] = useState("single");
   const [emission, setEmission] = useState();
+  const [trees, setTrees] = useState(0);
 
   const [hideLocationErr, setHideLocationErr] = useState(true);
   const [hideTripErr, setHideTripErr] = useState(true);
 
   const kgCO2perKm = 0.0351; // source: https://www.thetrainline.com/sustainable-travel (Train = National Rail 0.0351 kg CO2/passenger km)
-
-  // TODO: use train station data to calculate distance in km => km * kgCO2perKm
 
   // let grCo2Diesel = 74; // source = https://www.railplus.com.au/pdfs/ATOC-rail-is-greener-report.pdf
   // let electricConsumption = 0.108; // kWh / pkm for electric trains. Source: https://www.railplus.com.au/pdfs/ATOC-rail-is-greener-report.pdf
@@ -63,7 +63,9 @@ export default function Train({ trainStationsData }) {
     if (!destination) return setHideLocationErr(false);
     if (!trip) return setHideTripErr(false);
 
-    let originCode = origin.split("(")[1].slice(0, -1);
+    let originCode = origin
+      .split("(")
+      [origin.split("(").length - 1].slice(0, -1);
     let destinationCode = destination.split("(")[1].slice(0, -1);
 
     calculateCO2(originCode, destinationCode, trip);
@@ -73,10 +75,12 @@ export default function Train({ trainStationsData }) {
     const originObj = trainStationsData.find((t) => t["3alpha"] === origin);
     const destObj = trainStationsData.find((t) => t["3alpha"] === destination);
 
-    return geoDistance(
-      [originObj["longitude"], originObj["latitude"]],
-      [destObj["longitude"], destObj["latitude"]]
-    ) * 6371; // To convert great-arc distance (in radians) into km.
+    return (
+      geoDistance(
+        [originObj["longitude"], originObj["latitude"]],
+        [destObj["longitude"], destObj["latitude"]]
+      ) * 6371
+    ); // To convert great-arc distance (in radians) into km.
   };
 
   const calculateCO2 = (origin, destination, tripType) => {
@@ -89,6 +93,19 @@ export default function Train({ trainStationsData }) {
     }
 
     setEmission(grCo2Person);
+
+    // Convert grCo2Person from kg to tonnes
+    let rInTonnes = grCo2Person / 1000; // There are 1,000 kilograms in a tonne
+
+    if (rInTonnes <= 0.01) {
+      setEmission(0.01);
+    } else setEmission(rInTonnes.toFixed(2));
+
+    if (grCo2Person <= 1000) {
+      setTrees(1);
+    } else {
+      Math.round(grCo2Person / 1000);
+    }
   };
 
   return (
@@ -184,6 +201,8 @@ export default function Train({ trainStationsData }) {
         <div className="resContainer flexCol spacing">
           <h3>CO2 equivalent emission of your ride:</h3>
           <h3>{emission} kg</h3>
+          <br />
+          <PlantTrees num={trees} />
         </div>
       )}
     </div>

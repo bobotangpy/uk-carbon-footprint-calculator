@@ -14,6 +14,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import cars from "@/app/libs/cars.json";
+import PlantTrees from "./plantTrees";
 // import electricityEmissionFactors from "@/app/libs/electricity_emission_factors.json";
 
 export default function Car({ co2 }) {
@@ -30,6 +31,7 @@ export default function Car({ co2 }) {
   const [trip, setTrip] = useState("single");
   const [emission, setEmission] = useState();
   const [ciData, setCiData] = useState();
+  const [trees, setTrees] = useState(0);
 
   const [hideDistErr, setHideDistErr] = useState(true);
   const [hideSegmentErr, setHideSegmentErr] = useState(true);
@@ -165,8 +167,22 @@ export default function Car({ co2 }) {
       grCO2Person =
         Math.floor(grCO2Person / paxInCar) + (grCO2Person % paxInCar > 0);
     }
+    console.log(grCO2Person);
 
-    setEmission(grCO2Person); // emission per person
+    // setEmission(grCO2Person); // emission per person
+
+    // Convert grCO2Person from grams to tonnes
+    let rInTonnes = grCO2Person / 1e6; // 1e6 represents 1 million, which is the conversion factor from grams to tonnes
+
+    if (rInTonnes <= 0.01) {
+      setEmission(0.01);
+    } else setEmission(rInTonnes.toFixed(2));
+
+    if (grCO2Person <= 1e6) {
+      setTrees(1);
+    } else {
+      Math.round(grCO2Person / 1e6);
+    }
   };
 
   // look up carbon intensity for cars by Euro car segment and engine type
@@ -337,7 +353,9 @@ export default function Car({ co2 }) {
       {emission && (
         <div className="resContainer flexCol spacing">
           <h3>CO2 equivalent emission of your ride per person:</h3>
-          <h3>{emission} grams</h3>
+          <h3>{emission} tonnes</h3>
+          <br />
+          <PlantTrees num={trees} />
         </div>
       )}
     </div>

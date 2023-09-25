@@ -132,57 +132,52 @@ export default function Home() {
                 onChange={handleChange}
                 aria-label="Carbon Footprint Calculator tabs"
               >
-                <Tab
+                {/* <Tab
                   label="Household Energy"
                   icon={<HomeIcon />}
                   iconPosition="start"
                   {...a11yProps(0)}
-                />
+                /> */}
                 <Tab
                   label="Car"
                   icon={<DirectionsCarIcon />}
                   iconPosition="start"
-                  {...a11yProps(1)}
+                  {...a11yProps(0)}
                 />
                 <Tab
                   label="Flights"
                   icon={<FlightIcon />}
                   iconPosition="start"
-                  {...a11yProps(2)}
+                  {...a11yProps(1)}
                 />
                 {/* <Tab label="Motorbike" {...a11yProps(3)} /> */}
                 <Tab
                   label="Bus"
                   icon={<DirectionsBusIcon />}
                   iconPosition="start"
-                  {...a11yProps(3)}
+                  {...a11yProps(2)}
                 />
                 <Tab
                   label="Train"
                   icon={<TrainIcon />}
                   iconPosition="start"
-                  {...a11yProps(4)}
+                  {...a11yProps(3)}
                 />
                 <Tab
                   label="Ferry"
                   icon={<DirectionsBoatIcon />}
                   iconPosition="start"
-                  {...a11yProps(5)}
+                  {...a11yProps(4)}
                 />
               </Tabs>
             </Box>
-            <CustomTabPanel value={value} index={0}>
+            {/* <CustomTabPanel value={value} index={0}>
               <HouseholdEnergy />
-            </CustomTabPanel>
-            <CustomTabPanel value={value} index={1}>
+            </CustomTabPanel> */}
+            <CustomTabPanel value={value} index={0}>
               <Car co2={carCO2} />
             </CustomTabPanel>
-            <CustomTabPanel value={value} index={2}>
-              {/* <Flights
-                co2={flightCO2}
-                airportList={airportList}
-                airportsDetails={airportsDetails}
-              /> */}
+            <CustomTabPanel value={value} index={1}>
               <Flights2
                 co2={flightCO2}
                 airportList={airportList}
@@ -193,13 +188,13 @@ export default function Home() {
             {/* <CustomTabPanel value={value} index={3}>
               Motorbike
             </CustomTabPanel> */}
-            <CustomTabPanel value={value} index={3}>
+            <CustomTabPanel value={value} index={2}>
               <Bus co2={busCO2} />
             </CustomTabPanel>
-            <CustomTabPanel value={value} index={4}>
+            <CustomTabPanel value={value} index={3}>
               <Train trainStationsData={trainStationsData} />
             </CustomTabPanel>
-            <CustomTabPanel value={value} index={5}>
+            <CustomTabPanel value={value} index={4}>
               <Ferry co2={ferryCO2} />
             </CustomTabPanel>
           </Box>

@@ -9,12 +9,14 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
+import PlantTrees from "./plantTrees";
 
 export default function Ferry({ co2 }) {
   const [duration, setDuration] = useState("");
   const [vehicle, setVehicle] = useState("on-foot");
   const [trip, setTrip] = useState("round-trip");
   const [emission, setEmission] = useState();
+  const [trees, setTrees] = useState(0);
 
   const [hideDurationErr, setHideDurationErr] = useState(true);
   const [hideTripErr, setHideTripErr] = useState(true);
@@ -38,21 +40,30 @@ export default function Ferry({ co2 }) {
   };
 
   const handleSubmit = () => {
-    if (!duration ||!vehicle ||!trip) {
+    if (!duration || !vehicle || !trip) {
       setHideDurationErr(false);
       setHideVehicleErr(false);
       setHideTripErr(false);
       return;
     }
 
-    const emissions = calculateCO2FromDuration(
-      duration,
-      vehicle,
-      trip
-    );
+    const emissions = calculateCO2FromDuration(duration, vehicle, trip);
 
-    setEmission(emissions);
-  }
+    // setEmission(emissions);
+
+    // Convert emissions from grams to tonnes
+    let rInTonnes = emissions / 1e6; // 1e6 represents 1 million, which is the conversion factor from grams to tonnes
+
+    if (rInTonnes <= 0.01) {
+      setEmission(0.01);
+    } else setEmission(rInTonnes.toFixed(2));
+
+    if (emissions <= 1e6) {
+      setTrees(1);
+    } else {
+      Math.round(emissions / 1e6);
+    }
+  };
 
   const calculateCO2 = (distKm, vehicleFerry, tripType) => {
     const paxQty = 1;
@@ -112,7 +123,7 @@ export default function Ferry({ co2 }) {
           label="Duration in minutes"
           variant="outlined"
           type="number"
-          inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+          inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           onChange={(e) => updateDuration(e)}
         />
       </Box>
@@ -181,7 +192,9 @@ export default function Ferry({ co2 }) {
       {emission && (
         <div className="resContainer flexCol spacing">
           <h3>CO2 equivalent emission of your ride:</h3>
-          <h3>{emission} grams</h3>
+          <h3>{emission} tonnes</h3>
+          <br />
+          <PlantTrees num={trees} />
         </div>
       )}
     </div>

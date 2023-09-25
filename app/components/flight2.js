@@ -11,6 +11,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import { geoDistance } from "d3-geo";
+import PlantTrees from "./plantTrees";
 
 export default function Flights2({
   co2,
@@ -26,6 +27,7 @@ export default function Flights2({
   // const [duration, setDuration] = useState();
   const [trip, setTrip] = useState("round");
   const [emission, setEmission] = useState();
+  const [trees, setTrees] = useState(0);
 
   const [hideTripErr, setHideTripErr] = useState(true);
   const [hideDistanceErr, setHideDistanceErr] = useState(true);
@@ -97,16 +99,19 @@ export default function Flights2({
   const handleSubmit = () => {
     if (!trip) return setHideTripErr(false);
 
-    if (duration === null || (origin === null && destination === null)) {
+    // if (duration === null || (origin === null && destination === null)) {
+    //   return setHideDistanceErr(false);
+    // }
+    if (origin === null && destination === null) {
       return setHideDistanceErr(false);
     }
 
     if (!cabinClass) return setHideCabinErr(false);
 
-    if (duration) {
-      let co2 = calculateCO2FromDuration(duration, cabinClass, trip);
-      setEmission(co2);
-    }
+    // if (duration) {
+    //   let co2 = calculateCO2FromDuration(duration, cabinClass, trip);
+    //   setEmission(co2);
+    // }
 
     if (origin && destination) {
       let iataOrigin = origin.split("(")[1].slice(0, -1);
@@ -123,6 +128,8 @@ export default function Flights2({
       //   trip
       // );
       setEmission(co2);
+
+      setTrees(Math.round(co2));
     }
   };
   ////////////////////////////////////////////////////////////////
@@ -447,6 +454,8 @@ export default function Flights2({
         <div className="resContainer flexCol spacing">
           <h3>CO2 equivalent emission of your flight:</h3>
           <h2>{emission} tonnes</h2>
+          <br />
+          <PlantTrees num={trees} />
         </div>
       )}
     </div>

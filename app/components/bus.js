@@ -9,6 +9,7 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
+import PlantTrees from "./plantTrees";
 
 export default function Bus({ co2 }) {
   const [busCO2, setBusCO2] = useState(co2);
@@ -16,6 +17,7 @@ export default function Bus({ co2 }) {
   const [dist, setDist] = useState();
   const [trip, setTrip] = useState("single");
   const [emission, setEmission] = useState();
+  const [trees, setTrees] = useState(0);
 
   const calculateCO2 = (dist, trip) => {
     if (!busCO2) {
@@ -45,7 +47,20 @@ export default function Bus({ co2 }) {
 
     let r = calculateCO2(dist, trip);
     console.log({ r });
-    setEmission(r)
+
+    // Convert r from grams to tonnes
+    let rInTonnes = r / 1e6; // 1e6 represents 1 million, which is the conversion factor from grams to tonnes
+
+    if (rInTonnes <= 0.01) {
+      setEmission(0.01);
+    } else setEmission(rInTonnes.toFixed(2));
+    // setEmission(r);
+
+    if (r <= 1e6) {
+      setTrees(1);
+    } else {
+      Math.round(r / 1e6);
+    }
   };
 
   return (
@@ -64,7 +79,7 @@ export default function Bus({ co2 }) {
           label="Distance in km"
           variant="outlined"
           type="number"
-          inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+          inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           onChange={(e) => updateDist(e)}
         />
       </Box>
@@ -101,7 +116,9 @@ export default function Bus({ co2 }) {
       {emission && (
         <div className="resContainer flexCol spacing">
           <h3>CO2 equivalent emission of your ride:</h3>
-          <h3>{emission} grams</h3>
+          <h3>{emission} tonnes</h3>
+          <br />
+          <PlantTrees num={trees} />
         </div>
       )}
     </div>
