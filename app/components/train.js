@@ -200,7 +200,7 @@ export default function Train({ trainStationsData }) {
       {emission && (
         <div className="resContainer flexCol spacing">
           <h3>CO2 equivalent emission of your ride:</h3>
-          <h3>{emission} kg</h3>
+          <h3>{emission} tonnes</h3>
           <br />
           <PlantTrees num={trees} />
         </div>

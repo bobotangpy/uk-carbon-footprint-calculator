@@ -91,10 +91,11 @@ a {
   border: darkgreen solid 2px;
 }
 
-.resContainer h3, .resContainer h2{
+.resContainer h3,
+.resContainer h2 {
   margin: 10px 0;
 }
 
-.css-heg063-MuiTabs-flexContainer {
+.MuiTabs-flexContainer {
   justify-content: center;
 }
