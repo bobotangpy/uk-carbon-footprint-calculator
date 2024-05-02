@@ -1,0 +1,31 @@
+{
+  "footprints": [
+    {
+      "size": "small",
+      "fuel": [
+        { "diesel": 139.306 },
+        { "petrol": 140.799 },
+        { "hybrid": 101.499 },
+        { "electric": 48.228 }
+      ]
+    },
+    {
+      "size": "medium",
+      "fuel": [
+        { "diesel": 167.156 },
+        { "petrol": 178.189 },
+        { "hybrid": 109.038 },
+        { "electric": 52.666 }
+      ]
+    },
+    {
+      "size": "large",
+      "fuel": [
+        { "diesel": 208.586 },
+        { "petrol": 272.239 },
+        { "hybrid": 152.436 },
+        { "electric": 57.974 }
+      ]
+    }
+  ]
+}
