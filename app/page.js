@@ -19,10 +19,11 @@ import loadFactors from "@/app/libs/loadfactors.json";
 import trainStations from "@/app/libs/uk-train-stations.json";  //https://github.com/ellcom/UK-Train-Station-Locations
 import HouseholdEnergy from "./components/householdEnergy";
 import Bus from "./components/bus";
-// import Flights from "./components/flight";
 import Flights2 from "./components/flight2";
+import Flights3 from "./components/flight3";
 import Ferry from "./components/ferry";
 import Car from "./components/car";
+import Car2 from "./components/car2";
 import Train from "./components/train";
 import Loading from "./components/loading";
 
@@ -175,14 +176,14 @@ export default function Home() {
               <HouseholdEnergy />
             </CustomTabPanel> */}
             <CustomTabPanel value={value} index={0}>
-              <Car co2={carCO2} />
+              <Car2 co2={carCO2} />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-              <Flights2
+              <Flights3
                 co2={flightCO2}
                 airportList={airportList}
                 airportsDetails={airportsDetails}
-                loadFactorsData={loadFactorsData}
+                // loadFactorsData={loadFactorsData}
               />
             </CustomTabPanel>
             {/* <CustomTabPanel value={value} index={3}>

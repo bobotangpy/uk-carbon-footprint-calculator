@@ -15,6 +15,7 @@ export default function Bus({ co2 }) {
   const [busCO2, setBusCO2] = useState(co2);
 
   const [dist, setDist] = useState();
+  const [unit, setUnit] = useState('km');
   const [trip, setTrip] = useState("single");
   const [emission, setEmission] = useState();
   const [trees, setTrees] = useState(0);
@@ -25,7 +26,7 @@ export default function Bus({ co2 }) {
     }
 
     const gCO2Km = busCO2.coach;
-    const grCO2Person = dist * gCO2Km;
+    const grCO2Person = (unit === 'km' ? dist : convertToKm()) * gCO2Km;
 
     if (trip === "round") {
       return Math.floor(grCO2Person * 2);
@@ -34,8 +35,19 @@ export default function Bus({ co2 }) {
     return Math.floor(grCO2Person);
   };
 
+  const convertToKm = () => {
+    // Conversion from miles to kilometers
+    const milesToKm = (miles) => miles * 1.60934;
+    const distanceInKm = milesToKm(parseFloat(dist));
+    return distanceInKm;
+  };
+
   const updateDist = (e) => {
     setDist(e.target.value);
+  };
+
+  const updateUnit = (e) => {
+    setUnit(e.target.value);
   };
 
   const updateTrip = (e) => {
@@ -49,18 +61,18 @@ export default function Bus({ co2 }) {
     console.log({ r });
 
     // Convert r from grams to tonnes
-    let rInTonnes = r / 1e6; // 1e6 represents 1 million, which is the conversion factor from grams to tonnes
+    // let rInTonnes = r / 1e6; // 1e6 represents 1 million, which is the conversion factor from grams to tonnes
 
-    if (rInTonnes <= 0.01) {
-      setEmission(0.01);
-    } else setEmission(rInTonnes.toFixed(2));
-    // setEmission(r);
+    // if (rInTonnes <= 0.01) {
+    //   setEmission(0.01);
+    // } else setEmission(rInTonnes.toFixed(2));
+    // // setEmission(r);
 
-    if (r <= 1e6) {
-      setTrees(1);
-    } else {
-      Math.round(r / 1e6);
-    }
+    // if (r <= 1e6) {
+    //   setTrees(1);
+    // } else {
+    //   Math.round(r / 1e6);
+    // }
   };
 
   return (
@@ -76,13 +88,34 @@ export default function Bus({ co2 }) {
       >
         <TextField
           id="outlined-basic"
-          label="Distance in km"
+          label="Distance"
           variant="outlined"
           type="number"
           inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
           onChange={(e) => updateDist(e)}
         />
       </Box>
+
+      <FormControl className="spacing">
+        <FormLabel id="unit-radio-buttons-group-label">Unit</FormLabel>
+        <RadioGroup
+          aria-labelledby="unit-radio-buttons-group-label"
+          name="controlled-radio-buttons-group"
+          value={unit}
+          onChange={updateUnit}
+        >
+          <FormControlLabel
+            value="km"
+            control={<Radio />}
+            label="km"
+          />
+          <FormControlLabel
+            value="miles"
+            control={<Radio />}
+            label="miles"
+          />
+        </RadioGroup>
+      </FormControl>
 
       <FormControl className="spacing">
         <FormLabel id="trip-radio-buttons-group-label">Trip</FormLabel>

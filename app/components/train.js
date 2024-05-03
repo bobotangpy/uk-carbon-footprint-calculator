@@ -26,10 +26,7 @@ export default function Train({ trainStationsData }) {
   const [hideLocationErr, setHideLocationErr] = useState(true);
   const [hideTripErr, setHideTripErr] = useState(true);
 
-  const kgCO2perKm = 0.0351; // source: https://www.thetrainline.com/sustainable-travel (Train = National Rail 0.0351 kg CO2/passenger km)
-
-  // let grCo2Diesel = 74; // source = https://www.railplus.com.au/pdfs/ATOC-rail-is-greener-report.pdf
-  // let electricConsumption = 0.108; // kWh / pkm for electric trains. Source: https://www.railplus.com.au/pdfs/ATOC-rail-is-greener-report.pdf
+  const kgCO2perKm = 0.035463; // National Rail number
 
   useEffect(() => {
     if (trainStationsData) {

@@ -4,17 +4,17 @@
   "source": "https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2023",
   "gCO2": {
     "flight": {
-      "domestic": { "avg": 272.58 },
+      "domestic": { "avg": 33.50 },
       "shortHaul": {
-        "avg": 185.92,
-        "economyClass": 182.87,
-        "businessClass": 274.3
+        "avg": 22.86,
+        "economyClass": 22.49,
+        "businessClass": 33.73
       },
       "longHaul": {
-        "avg": 261.28,
-        "economyClass": 200.11,
-        "businessClass": 580.29,
-        "firstClass": 800.4
+        "avg": 32.13,
+        "economyClass": 24.61,
+        "businessClass": 71.37,
+        "firstClass": 98.44
       },
       "comments": "According to the source: short-haul is up to 3700km. long-haul is over 3700km"
     },
