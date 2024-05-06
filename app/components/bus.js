@@ -17,7 +17,8 @@ export default function Bus({ co2 }) {
   const [dist, setDist] = useState();
   const [unit, setUnit] = useState('km');
   const [trip, setTrip] = useState("single");
-  const [emission, setEmission] = useState();
+  const [gramsEmission, setGramsEmission] = useState();
+  const [tonnesEmission, setTonnesEmission] = useState();
   const [trees, setTrees] = useState(0);
 
   const calculateCO2 = (dist, trip) => {
@@ -60,19 +61,19 @@ export default function Bus({ co2 }) {
     let r = calculateCO2(dist, trip);
     console.log({ r });
 
+    setGramsEmission(r);
+
     // Convert r from grams to tonnes
-    // let rInTonnes = r / 1e6; // 1e6 represents 1 million, which is the conversion factor from grams to tonnes
+    let rInTonnes = r / 1e6; // 1e6 represents 1 million, which is the conversion factor from grams to tonnes
 
-    // if (rInTonnes <= 0.01) {
-    //   setEmission(0.01);
-    // } else setEmission(rInTonnes.toFixed(2));
-    // // setEmission(r);
+    let annualCo2 = rInTonnes.toFixed(2) * 5 * 48;
+    setTonnesEmission(annualCo2);
 
-    // if (r <= 1e6) {
-    //   setTrees(1);
-    // } else {
-    //   Math.round(r / 1e6);
-    // }
+    if (annualCo2 <= 1) {
+      setTrees(1);
+    } else {
+      setTrees(Math.round(annualCo2));
+    }
   };
 
   return (
@@ -146,12 +147,18 @@ export default function Bus({ co2 }) {
         Submit
       </Button>
 
-      {emission && (
+      {tonnesEmission && (
         <div className="resContainer flexCol spacing">
           <h3>CO2 equivalent emission of your ride:</h3>
-          <h3>{emission} tonnes</h3>
+          <h3>{gramsEmission} grams</h3>
           <br />
+
+          <h3>The CO2 equivalent emission of your annual commute<sup>*</sup> would be:</h3>
+          <h3>{tonnesEmission} tonnes</h3>
           <PlantTrees num={trees} />
+
+          <br />
+          <p><sup>*</sup></p>
         </div>
       )}
     </div>

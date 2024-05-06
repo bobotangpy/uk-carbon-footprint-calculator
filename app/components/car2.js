@@ -22,7 +22,8 @@ export default function Car2() {
   const [people, setPeople] = useState();
   const [trip, setTrip] = useState("single");
   const [ciData, setCiData] = useState();
-  const [emission, setEmission] = useState();
+  const [kgEmission, setKgEmission] = useState();
+  const [tonnesEmission, setTonnesEmission] = useState();
   const [trees, setTrees] = useState(0);
 
   const [hideDistErr, setHideDistErr] = useState(true);
@@ -94,19 +95,18 @@ export default function Car2() {
     }
     console.log(grCO2Person);
 
-    // setEmission(grCO2Person); // emission per person
+    setKgEmission(grCO2Person); // emission per person
 
     // Convert grCO2Person from grams to tonnes
     let rInTonnes = grCO2Person / 1e6; // 1e6 represents 1 million, which is the conversion factor from grams to tonnes
 
-    if (rInTonnes <= 0.01) {
-      setEmission(0.01);
-    } else setEmission(rInTonnes.toFixed(2));
+    let annualCo2 = rInTonnes.toFixed(2) * 5 * 48;
+    setTonnesEmission(annualCo2);
 
-    if (grCO2Person <= 1e6) {
+    if (annualCo2 <= 1) {
       setTrees(1);
     } else {
-      Math.round(grCO2Person / 1e6);
+      setTrees(Math.round(annualCo2));
     }
   };
 
@@ -242,12 +242,18 @@ export default function Car2() {
         Submit
       </Button>
 
-      {emission && (
+      {tonnesEmission && (
         <div className="resContainer flexCol spacing">
           <h3>CO2 equivalent emission of your ride per person:</h3>
-          <h3>{emission} tonnes</h3>
+          <h3>{kgEmission} kg</h3>
           <br />
+
+          <h3>The CO2 equivalent emission of your annual commute<sup>*</sup> would be:</h3>
+          <h3>{tonnesEmission} tonnes</h3>
           <PlantTrees num={trees} />
+
+          <br />
+          <p><sup>*</sup></p>
         </div>
       )}
     </div>

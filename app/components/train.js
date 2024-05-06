@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-// import carbonIntensityData from "@/app/libs/ci_by_source.json";
-// import electricityMixesData from "@/app/libs/electricity_mixes.json";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -20,7 +18,8 @@ export default function Train({ trainStationsData }) {
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
   const [trip, setTrip] = useState("single");
-  const [emission, setEmission] = useState();
+  const [kgEmission, setKgEmission] = useState();
+  const [tonnesEmission, setTonnesEmission] = useState();
   const [trees, setTrees] = useState(0);
 
   const [hideLocationErr, setHideLocationErr] = useState(true);
@@ -89,19 +88,18 @@ export default function Train({ trainStationsData }) {
       grCo2Person *= 2;
     }
 
-    setEmission(grCo2Person);
+    setKgEmission(grCo2Person);
 
     // Convert grCo2Person from kg to tonnes
     let rInTonnes = grCo2Person / 1000; // There are 1,000 kilograms in a tonne
 
-    if (rInTonnes <= 0.01) {
-      setEmission(0.01);
-    } else setEmission(rInTonnes.toFixed(2));
+    let annualCo2 = rInTonnes.toFixed(2) * 5 * 48;
+    setTonnesEmission(annualCo2);
 
-    if (grCo2Person <= 1000) {
+    if (annualCo2 <= 1) {
       setTrees(1);
     } else {
-      Math.round(grCo2Person / 1000);
+      setTrees(Math.round(annualCo2));
     }
   };
 
@@ -194,12 +192,17 @@ export default function Train({ trainStationsData }) {
         Submit
       </Button>
 
-      {emission && (
+      {tonnesEmission && (
         <div className="resContainer flexCol spacing">
           <h3>CO2 equivalent emission of your ride:</h3>
-          <h3>{emission} tonnes</h3>
+          <h3>{kgEmission} kg</h3>
           <br />
+
+          <h3>The CO2 equivalent emission of your annual commute<sup>*</sup> would be:</h3>
+          <h3>{tonnesEmission} tonnes</h3>
           <PlantTrees num={trees} />
+
+          <p><sup>*</sup></p>
         </div>
       )}
     </div>
