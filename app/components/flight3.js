@@ -77,7 +77,9 @@ export default function Flights3({
 
       setEmission(co2);
 
-      setTrees(Math.round(co2));
+      if (co2 < 1) {
+        setTrees(1);
+      } else setTrees(Math.round(co2));
     }
   };
   ////////////////////////////////////////////////////////////////

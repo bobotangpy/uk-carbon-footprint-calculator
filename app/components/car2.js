@@ -18,12 +18,14 @@ import PlantTrees from "./plantTrees";
 export default function Car2() {
   const [fuelType, setFuelType] = useState("diesel");
   const [size, setSize] = useState("small");
-  const [distKm, setDistKm] = useState();
+  const [dist, setDist] = useState();
+  const [unit, setUnit] = useState('km');
   const [people, setPeople] = useState();
   const [trip, setTrip] = useState("single");
   const [ciData, setCiData] = useState();
   const [kgEmission, setKgEmission] = useState();
   const [tonnesEmission, setTonnesEmission] = useState();
+  const [est, setEst] = useState(false);
   const [trees, setTrees] = useState(0);
 
   const [hideDistErr, setHideDistErr] = useState(true);
@@ -42,8 +44,12 @@ export default function Car2() {
   };
 
   const updateDist = (e) => {
-    setDistKm(e.target.value);
+    setDist(e.target.value);
     setHideDistErr(true);
+  };
+
+  const updateUnit = (e) => {
+    setUnit(e.target.value);
   };
 
   const updateFuelType = (e) => {
@@ -65,25 +71,32 @@ export default function Car2() {
   };
 
   const handleSubmit = () => {
-    if (!distKm) return setHideDistErr(false);
+    if (!dist) return setHideDistErr(false);
     if (!size) return setHideSizeErr(false);
     if (!fuelType) return setHideFuelErr(false);
     if (!people) return setHidePeopleErr(false);
     if (!trip) return setHideTripErr(false);
 
-    calculateCO2(distKm, size, fuelType, people, trip);
+    calculateCO2(dist, size, fuelType, people, trip);
+  };
+
+  const convertToKm = () => {
+    // Conversion from miles to kilometers
+    const milesToKm = (miles) => miles * 1.60934;
+    const distanceInKm = milesToKm(parseFloat(dist));
+    return distanceInKm;
   };
 
   const calculateCO2 = (
-    distKm,
+    dist,
     carSize,
     fuelType,
     paxInCar,
     tripType
   ) => {
     let grCO2Driving = carbonIntensity(carSize, fuelType);
-
-    let grCO2Person = grCO2Driving * distKm;
+    
+    let grCO2Person = (unit === 'km' ? dist : convertToKm()) * grCO2Driving;
 
     if (tripType === "round-trip") {
       grCO2Person *= 2;
@@ -95,13 +108,18 @@ export default function Car2() {
     }
     console.log(grCO2Person);
 
-    setKgEmission(grCO2Person); // emission per person
+    setKgEmission(Math.round(grCO2Person)); // emission per person
 
     // Convert grCO2Person from grams to tonnes
     let rInTonnes = grCO2Person / 1e6; // 1e6 represents 1 million, which is the conversion factor from grams to tonnes
-
+    
     let annualCo2 = rInTonnes.toFixed(2) * 5 * 48;
-    setTonnesEmission(annualCo2);
+    console.log({annualCo2});
+
+    if(annualCo2 < 1) {
+      setTonnesEmission(1);
+      setEst(true);
+    } else setTonnesEmission(Math.round(annualCo2));
 
     if (annualCo2 <= 1) {
       setTrees(1);
@@ -118,10 +136,6 @@ export default function Car2() {
   };
 
   return (
-    // distKm,
-    // fuelType ['electric', 'diesel', 'petrol']
-    // num of ppl in car
-    // tripType
     <div className="flexCol">
       <Box
         component="form"
@@ -134,7 +148,7 @@ export default function Car2() {
       >
         <TextField
           id="outlined-basic"
-          label="Distance in km"
+          label="Distance"
           variant="outlined"
           type="number"
           inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
@@ -144,6 +158,27 @@ export default function Car2() {
       <p className="error" hidden={hideDistErr}>
         Please enter the distance of the journey.
       </p>
+
+      <FormControl className="spacing">
+        <FormLabel id="unit-radio-buttons-group-label">Unit</FormLabel>
+        <RadioGroup
+          aria-labelledby="unit-radio-buttons-group-label"
+          name="controlled-radio-buttons-group"
+          value={unit}
+          onChange={updateUnit}
+        >
+          <FormControlLabel
+            value="km"
+            control={<Radio />}
+            label="km"
+          />
+          <FormControlLabel
+            value="miles"
+            control={<Radio />}
+            label="miles"
+          />
+        </RadioGroup>
+      </FormControl>
 
       <Box sx={{ minWidth: "25ch" }} className="spacing">
         <FormControl fullWidth>
@@ -242,18 +277,22 @@ export default function Car2() {
         Submit
       </Button>
 
-      {tonnesEmission && (
+      {kgEmission && (
         <div className="resContainer flexCol spacing">
           <h3>CO2 equivalent emission of your ride per person:</h3>
           <h3>{kgEmission} kg</h3>
           <br />
 
-          <h3>The CO2 equivalent emission of your annual commute<sup>*</sup> would be:</h3>
-          <h3>{tonnesEmission} tonnes</h3>
-          <PlantTrees num={trees} />
+        {tonnesEmission && (
+          <>
+            <h3>The CO2 equivalent emission of your annual commute<sup>*</sup> would be {est ? `around` : ""}:</h3>
+            <h3>{tonnesEmission} tonnes</h3>
+            <PlantTrees num={trees} />
 
-          <br />
-          <p><sup>*</sup></p>
+            <br />
+            <p><sup>*</sup>5 days a week, 48 weeks a year</p>
+          </>
+        )}
         </div>
       )}
     </div>

@@ -88,13 +88,14 @@ export default function Train({ trainStationsData }) {
       grCo2Person *= 2;
     }
 
-    setKgEmission(grCo2Person);
+    setKgEmission(Math.round(grCo2Person));
 
     // Convert grCo2Person from kg to tonnes
     let rInTonnes = grCo2Person / 1000; // There are 1,000 kilograms in a tonne
 
     let annualCo2 = rInTonnes.toFixed(2) * 5 * 48;
-    setTonnesEmission(annualCo2);
+    setTonnesEmission(Math.round(annualCo2));
+    console.log({annualCo2});
 
     if (annualCo2 <= 1) {
       setTrees(1);
@@ -201,8 +202,8 @@ export default function Train({ trainStationsData }) {
           <h3>The CO2 equivalent emission of your annual commute<sup>*</sup> would be:</h3>
           <h3>{tonnesEmission} tonnes</h3>
           <PlantTrees num={trees} />
-
-          <p><sup>*</sup></p>
+          <br />
+          <p><sup>*</sup>5 days a week, 48 weeks a year</p>
         </div>
       )}
     </div>

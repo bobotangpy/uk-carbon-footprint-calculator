@@ -61,13 +61,14 @@ export default function Bus({ co2 }) {
     let r = calculateCO2(dist, trip);
     console.log({ r });
 
-    setGramsEmission(r);
+    setGramsEmission(Math.round(r));
 
     // Convert r from grams to tonnes
     let rInTonnes = r / 1e6; // 1e6 represents 1 million, which is the conversion factor from grams to tonnes
 
     let annualCo2 = rInTonnes.toFixed(2) * 5 * 48;
-    setTonnesEmission(annualCo2);
+    setTonnesEmission(Math.round(annualCo2));
+    console.log({annualCo2});
 
     if (annualCo2 <= 1) {
       setTrees(1);
@@ -158,7 +159,7 @@ export default function Bus({ co2 }) {
           <PlantTrees num={trees} />
 
           <br />
-          <p><sup>*</sup></p>
+          <p><sup>*</sup>5 days a week, 48 weeks a year</p>
         </div>
       )}
     </div>
