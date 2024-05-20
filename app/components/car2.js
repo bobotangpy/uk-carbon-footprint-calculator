@@ -14,6 +14,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import cars from "@/app/libs/cars-by-size.json";
 import PlantTrees from "./plantTrees";
+import Donate from "./donate";
 
 export default function Car2() {
   const [fuelType, setFuelType] = useState("diesel");
@@ -27,6 +28,7 @@ export default function Car2() {
   const [tonnesEmission, setTonnesEmission] = useState();
   const [est, setEst] = useState(false);
   const [trees, setTrees] = useState(0);
+  const [showDonate, setShowDonate] = useState(false);
 
   const [hideDistErr, setHideDistErr] = useState(true);
   const [hideSizeErr, setHideSizeErr] = useState(true);
@@ -119,7 +121,11 @@ export default function Car2() {
     if(annualCo2 < 1) {
       setTonnesEmission(1);
       setEst(true);
-    } else setTonnesEmission(Math.round(annualCo2));
+      setShowDonate(true);
+    } else {
+      setTonnesEmission(Math.round(annualCo2));
+      setShowDonate(true);
+    }
 
     if (annualCo2 <= 1) {
       setTrees(1);
@@ -287,7 +293,7 @@ export default function Car2() {
           <>
             <h3>The CO2 equivalent emission of your annual commute<sup>*</sup> would be {est ? `around` : ""}:</h3>
             <h3>{tonnesEmission} tonnes</h3>
-            <PlantTrees num={trees} />
+            {showDonate ? <Donate /> : <PlantTrees num={trees} />}
 
             <br />
             <p><sup>*</sup>5 days a week, 48 weeks a year</p>

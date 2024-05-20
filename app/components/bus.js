@@ -10,6 +10,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import PlantTrees from "./plantTrees";
+import Donate from "./donate";
 
 export default function Bus({ co2 }) {
   const [busCO2, setBusCO2] = useState(co2);
@@ -20,6 +21,7 @@ export default function Bus({ co2 }) {
   const [gramsEmission, setGramsEmission] = useState();
   const [tonnesEmission, setTonnesEmission] = useState();
   const [trees, setTrees] = useState(0);
+  const [showDonate, setShowDonate] = useState(false);
 
   const calculateCO2 = (dist, trip) => {
     if (!busCO2) {
@@ -67,11 +69,12 @@ export default function Bus({ co2 }) {
     let rInTonnes = r / 1e6; // 1e6 represents 1 million, which is the conversion factor from grams to tonnes
 
     let annualCo2 = rInTonnes.toFixed(2) * 5 * 48;
-    setTonnesEmission(Math.round(annualCo2));
+    setTonnesEmission(annualCo2 !== 0 ? Math.round(annualCo2) : 1);
     console.log({annualCo2});
 
     if (annualCo2 <= 1) {
       setTrees(1);
+      setShowDonate(true);
     } else {
       setTrees(Math.round(annualCo2));
     }
@@ -156,7 +159,7 @@ export default function Bus({ co2 }) {
 
           <h3>The CO2 equivalent emission of your annual commute<sup>*</sup> would be:</h3>
           <h3>{tonnesEmission} tonnes</h3>
-          <PlantTrees num={trees} />
+          {showDonate ? <Donate /> : <PlantTrees num={trees} />}
 
           <br />
           <p><sup>*</sup>5 days a week, 48 weeks a year</p>

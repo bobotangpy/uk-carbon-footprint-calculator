@@ -12,6 +12,7 @@ import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import { geoDistance } from "d3-geo";
 import PlantTrees from "./plantTrees";
+import Donate from "./donate";
 
 export default function Train({ trainStationsData }) {
   const [stationList, setStationList] = useState("");
@@ -21,6 +22,7 @@ export default function Train({ trainStationsData }) {
   const [kgEmission, setKgEmission] = useState();
   const [tonnesEmission, setTonnesEmission] = useState();
   const [trees, setTrees] = useState(0);
+  const [showDonate, setShowDonate] = useState(false);
 
   const [hideLocationErr, setHideLocationErr] = useState(true);
   const [hideTripErr, setHideTripErr] = useState(true);
@@ -94,11 +96,12 @@ export default function Train({ trainStationsData }) {
     let rInTonnes = grCo2Person / 1000; // There are 1,000 kilograms in a tonne
 
     let annualCo2 = rInTonnes.toFixed(2) * 5 * 48;
-    setTonnesEmission(Math.round(annualCo2));
+    setTonnesEmission(annualCo2 !== 0 ? Math.round(annualCo2) : 1);
     console.log({annualCo2});
 
     if (annualCo2 <= 1) {
       setTrees(1);
+      setShowDonate(true);
     } else {
       setTrees(Math.round(annualCo2));
     }
@@ -201,7 +204,7 @@ export default function Train({ trainStationsData }) {
 
           <h3>The CO2 equivalent emission of your annual commute<sup>*</sup> would be:</h3>
           <h3>{tonnesEmission} tonnes</h3>
-          <PlantTrees num={trees} />
+          {showDonate ? <Donate /> : <PlantTrees num={trees} />}
           <br />
           <p><sup>*</sup>5 days a week, 48 weeks a year</p>
         </div>

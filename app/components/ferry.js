@@ -10,6 +10,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 import PlantTrees from "./plantTrees";
+import Donate from "./donate";
 
 export default function Ferry({ co2 }) {
   const [duration, setDuration] = useState("");
@@ -17,6 +18,7 @@ export default function Ferry({ co2 }) {
   const [trip, setTrip] = useState("round-trip");
   const [emission, setEmission] = useState();
   const [trees, setTrees] = useState(0);
+  const [showDonate, setShowDonate] = useState(false);
 
   const [hideDurationErr, setHideDurationErr] = useState(true);
   const [hideTripErr, setHideTripErr] = useState(true);
@@ -60,6 +62,7 @@ export default function Ferry({ co2 }) {
 
     if (emissions <= 1e6) {
       setTrees(1);
+      setShowDonate(true);
     } else {
       Math.round(emissions / 1e6);
     }
@@ -194,7 +197,7 @@ export default function Ferry({ co2 }) {
           <h3>CO2 equivalent emission of your ride:</h3>
           <h3>{emission} tonnes</h3>
           <br />
-          <PlantTrees num={trees} />
+          {showDonate ? <Donate /> : <PlantTrees num={trees} />}
         </div>
       )}
     </div>
