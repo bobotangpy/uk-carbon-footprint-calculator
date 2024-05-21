@@ -23,7 +23,7 @@ export default function Car2() {
   const [unit, setUnit] = useState('km');
   const [people, setPeople] = useState();
   const [trip, setTrip] = useState("single");
-  const [ciData, setCiData] = useState();
+  const [ciData, setCiData] = useState([]);
   const [kgEmission, setKgEmission] = useState();
   const [tonnesEmission, setTonnesEmission] = useState();
   const [est, setEst] = useState(false);
@@ -41,7 +41,7 @@ export default function Car2() {
   }, []);
 
   const fetchData = async () => {
-    const carsData = await cars;
+    const carsData = await cars; // Ensure cars is correctly defined/imported
     setCiData(carsData.footprints);
   };
 
@@ -82,43 +82,28 @@ export default function Car2() {
     calculateCO2(dist, size, fuelType, people, trip);
   };
 
-  const convertToKm = () => {
-    // Conversion from miles to kilometers
-    const milesToKm = (miles) => miles * 1.60934;
-    const distanceInKm = milesToKm(parseFloat(dist));
-    return distanceInKm;
-  };
+  const convertToKm = (miles) => miles * 1.60934;
 
-  const calculateCO2 = (
-    dist,
-    carSize,
-    fuelType,
-    paxInCar,
-    tripType
-  ) => {
-    let grCO2Driving = carbonIntensity(carSize, fuelType);
-    
-    let grCO2Person = (unit === 'km' ? dist : convertToKm()) * grCO2Driving;
+  const calculateCO2 = (distance, carSize, fuel, paxInCar, tripType) => {
+    const grCO2Driving = carbonIntensity(carSize, fuel);
+    let distanceInKm = unit === 'km' ? parseFloat(distance) : convertToKm(parseFloat(distance));
+    let grCO2Person = distanceInKm * grCO2Driving;
 
-    if (tripType === "round-trip") {
+    if (tripType === "round") {
       grCO2Person *= 2;
     }
 
     if (parseInt(paxInCar) > 1) {
-      grCO2Person =
-        Math.floor(grCO2Person / paxInCar) + (grCO2Person % paxInCar > 0);
+      grCO2Person = Math.floor(grCO2Person / paxInCar) + (grCO2Person % paxInCar > 0);
     }
-    console.log(grCO2Person);
 
-    setKgEmission(Math.round(grCO2Person)); // emission per person
+    setKgEmission(Math.round(grCO2Person / 1000)); // emission per person in kg
 
     // Convert grCO2Person from grams to tonnes
     let rInTonnes = grCO2Person / 1e6; // 1e6 represents 1 million, which is the conversion factor from grams to tonnes
-    
-    let annualCo2 = rInTonnes.toFixed(2) * 5 * 48;
-    console.log({annualCo2});
+    let annualCo2 = rInTonnes * 5 * 48; // 5 round-trips per week, 48 weeks per year
 
-    if(annualCo2 < 1) {
+    if (annualCo2 < 1) {
       setTonnesEmission(1);
       setEst(true);
       setShowDonate(true);
@@ -127,18 +112,16 @@ export default function Car2() {
       setShowDonate(true);
     }
 
-    if (annualCo2 <= 1) {
-      setTrees(1);
-    } else {
-      setTrees(Math.round(annualCo2));
-    }
+    setTrees(annualCo2 <= 1 ? 1 : Math.round(annualCo2));
   };
 
   const carbonIntensity = (carSize, fuelType) => {
-    const entry = ciData.find((d) => d.size == carSize);
-    const co2 = entry.fuel.find((item) => Object.keys(item).includes(fuelType));
-    
-    return co2[fuelType];
+    const entry = ciData.find((d) => d.size === carSize);
+    if (entry) {
+      const co2 = entry.fuel.find((item) => item[fuelType]);
+      return co2 ? co2[fuelType] : 0;
+    }
+    return 0;
   };
 
   return (
@@ -158,7 +141,7 @@ export default function Car2() {
           variant="outlined"
           type="number"
           inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-          onChange={(e) => updateDist(e)}
+          onChange={updateDist}
         />
       </Box>
       <p className="error" hidden={hideDistErr}>
@@ -244,11 +227,11 @@ export default function Car2() {
           variant="outlined"
           type="number"
           inputProps={{ inputMode: "numeric", pattern: "[0-9]*", min: 1 }}
-          onChange={(e) => updatePeople(e)}
+          onChange={updatePeople}
         />
       </Box>
       <p className="error" hidden={hidePeopleErr}>
-        Please enter the number of passangers (including driver).
+        Please enter the number of passengers (including driver).
       </p>
 
       <FormControl className="spacing">

@@ -14,7 +14,6 @@ import Donate from "./donate";
 
 export default function Bus({ co2 }) {
   const [busCO2, setBusCO2] = useState(co2);
-
   const [dist, setDist] = useState();
   const [unit, setUnit] = useState('km');
   const [trip, setTrip] = useState("single");
@@ -23,26 +22,25 @@ export default function Bus({ co2 }) {
   const [trees, setTrees] = useState(0);
   const [showDonate, setShowDonate] = useState(false);
 
-  const calculateCO2 = (dist, trip) => {
+  const calculateCO2 = (distance, tripType) => {
     if (!busCO2) {
-      return null; // Handle the case when data is not yet loaded
+      return 0; // Handle the case when data is not yet loaded
     }
 
     const gCO2Km = busCO2.coach;
-    const grCO2Person = (unit === 'km' ? dist : convertToKm()) * gCO2Km;
+    const distanceInKm = unit === 'km' ? parseFloat(distance) : convertToKm(parseFloat(distance));
+    let grCO2Person = distanceInKm * gCO2Km;
 
-    if (trip === "round") {
-      return Math.floor(grCO2Person * 2);
+    if (tripType === "round") {
+      grCO2Person *= 2;
     }
 
     return Math.floor(grCO2Person);
   };
 
-  const convertToKm = () => {
+  const convertToKm = (miles) => {
     // Conversion from miles to kilometers
-    const milesToKm = (miles) => miles * 1.60934;
-    const distanceInKm = milesToKm(parseFloat(dist));
-    return distanceInKm;
+    return miles * 1.60934;
   };
 
   const updateDist = (e) => {
@@ -58,19 +56,23 @@ export default function Bus({ co2 }) {
   };
 
   const handleSubmit = () => {
-    console.log(dist, trip);
+    if (!dist) {
+      console.error("Distance is required");
+      return;
+    }
 
-    let r = calculateCO2(dist, trip);
+    const r = calculateCO2(dist, trip);
     console.log({ r });
 
     setGramsEmission(Math.round(r));
 
     // Convert r from grams to tonnes
-    let rInTonnes = r / 1e6; // 1e6 represents 1 million, which is the conversion factor from grams to tonnes
+    const rInTonnes = r / 1e6; // 1e6 represents 1 million, which is the conversion factor from grams to tonnes
 
-    let annualCo2 = rInTonnes.toFixed(2) * 5 * 48;
-    setTonnesEmission(annualCo2 !== 0 ? Math.round(annualCo2) : 1);
-    console.log({annualCo2});
+    const annualCo2 = rInTonnes * 5 * 48; // 5 round-trips per year and 48 weeks per year
+    console.log({ annualCo2 }); // Log the calculated annual CO2 before setting state
+
+    setTonnesEmission(annualCo2 < 1 ? 1 : Math.round(annualCo2));
 
     if (annualCo2 <= 1) {
       setTrees(1);

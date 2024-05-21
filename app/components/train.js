@@ -15,7 +15,7 @@ import PlantTrees from "./plantTrees";
 import Donate from "./donate";
 
 export default function Train({ trainStationsData }) {
-  const [stationList, setStationList] = useState("");
+  const [stationList, setStationList] = useState([]);
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
   const [trip, setTrip] = useState("single");
@@ -31,15 +31,10 @@ export default function Train({ trainStationsData }) {
 
   useEffect(() => {
     if (trainStationsData) {
-      let listArr = [];
-
-      trainStationsData.map((item) => {
-        listArr.push(`${item.station_name} (${item["3alpha"]})`);
-      });
-
+      let listArr = trainStationsData.map((item) => `${item.station_name} (${item["3alpha"]})`);
       setStationList(listArr);
     }
-  }, []);
+  }, [trainStationsData]);
 
   const updateOrigin = (val) => {
     setOrigin(val);
@@ -61,10 +56,8 @@ export default function Train({ trainStationsData }) {
     if (!destination) return setHideLocationErr(false);
     if (!trip) return setHideTripErr(false);
 
-    let originCode = origin
-      .split("(")
-      [origin.split("(").length - 1].slice(0, -1);
-    let destinationCode = destination.split("(")[1].slice(0, -1);
+    let originCode = origin.match(/\(([^)]+)\)$/)[1];
+    let destinationCode = destination.match(/\(([^)]+)\)$/)[1];
 
     calculateCO2(originCode, destinationCode, trip);
   };
@@ -73,37 +66,36 @@ export default function Train({ trainStationsData }) {
     const originObj = trainStationsData.find((t) => t["3alpha"] === origin);
     const destObj = trainStationsData.find((t) => t["3alpha"] === destination);
 
-    return (
-      geoDistance(
-        [originObj["longitude"], originObj["latitude"]],
-        [destObj["longitude"], destObj["latitude"]]
-      ) * 6371
-    ); // To convert great-arc distance (in radians) into km.
+    return geoDistance(
+      [originObj["longitude"], originObj["latitude"]],
+      [destObj["longitude"], destObj["latitude"]]
+    ) * 6371; // To convert great-arc distance (in radians) into km.
   };
 
   const calculateCO2 = (origin, destination, tripType) => {
     let distKm = calculateDistance(origin, destination);
 
-    let grCo2Person = Math.floor(kgCO2perKm * distKm);
+    let kgCo2Person = kgCO2perKm * distKm;
 
     if (tripType === "round-trip") {
-      grCo2Person *= 2;
+      kgCo2Person *= 2;
     }
 
-    setKgEmission(Math.round(grCo2Person));
+    setKgEmission(Math.round(kgCo2Person));
 
-    // Convert grCo2Person from kg to tonnes
-    let rInTonnes = grCo2Person / 1000; // There are 1,000 kilograms in a tonne
+    // Convert kgCo2Person to tonnes
+    let rInTonnes = kgCo2Person / 1000; // There are 1,000 kilograms in a tonne
 
-    let annualCo2 = rInTonnes.toFixed(2) * 5 * 48;
+    let annualCo2 = rInTonnes * 5 * 48; // 5 round-trips per year and 48 weeks per year
     setTonnesEmission(annualCo2 !== 0 ? Math.round(annualCo2) : 1);
-    console.log({annualCo2});
+    console.log({ annualCo2 });
 
     if (annualCo2 <= 1) {
       setTrees(1);
       setShowDonate(true);
     } else {
       setTrees(Math.round(annualCo2));
+      setShowDonate(true);
     }
   };
 
