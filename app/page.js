@@ -5,24 +5,20 @@ import PropTypes from "prop-types";
 import styles from "./styles/page.module.css";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import HomeIcon from "@mui/icons-material/Home";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
 import FlightIcon from "@mui/icons-material/Flight";
 import TrainIcon from "@mui/icons-material/Train";
 import DirectionsBoatIcon from "@mui/icons-material/DirectionsBoat";
-// import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import govData from "@/app/libs/gov_uk.json";
 import airportData from "@/app/libs/airport.json";
 import loadFactors from "@/app/libs/loadfactors.json";
-import trainStations from "@/app/libs/uk-train-stations.json";  //https://github.com/ellcom/UK-Train-Station-Locations
-import HouseholdEnergy from "./components/householdEnergy";
+import trainStations from "@/app/libs/uk-train-stations.json"; //https://github.com/ellcom/UK-Train-Station-Locations
 import Bus from "./components/bus";
-import Flights2 from "./components/flight2";
 import Flights3 from "./components/flight3";
+import Flights4 from "./components/flight4";
 import Ferry from "./components/ferry";
-import Car from "./components/car";
 import Car2 from "./components/car2";
 import Train from "./components/train";
 import Loading from "./components/loading";
@@ -133,12 +129,6 @@ export default function Home() {
                 onChange={handleChange}
                 aria-label="Carbon Footprint Calculator tabs"
               >
-                {/* <Tab
-                  label="Household Energy"
-                  icon={<HomeIcon />}
-                  iconPosition="start"
-                  {...a11yProps(0)}
-                /> */}
                 <Tab
                   label="Car"
                   icon={<DirectionsCarIcon />}
@@ -151,7 +141,6 @@ export default function Home() {
                   iconPosition="start"
                   {...a11yProps(1)}
                 />
-                {/* <Tab label="Motorbike" {...a11yProps(3)} /> */}
                 <Tab
                   label="Bus"
                   icon={<DirectionsBusIcon />}
@@ -172,23 +161,16 @@ export default function Home() {
                 />
               </Tabs>
             </Box>
-            {/* <CustomTabPanel value={value} index={0}>
-              <HouseholdEnergy />
-            </CustomTabPanel> */}
             <CustomTabPanel value={value} index={0}>
               <Car2 co2={carCO2} />
             </CustomTabPanel>
             <CustomTabPanel value={value} index={1}>
-              <Flights3
+              <Flights4
                 co2={flightCO2}
                 airportList={airportList}
                 airportsDetails={airportsDetails}
-                // loadFactorsData={loadFactorsData}
               />
             </CustomTabPanel>
-            {/* <CustomTabPanel value={value} index={3}>
-              Motorbike
-            </CustomTabPanel> */}
             <CustomTabPanel value={value} index={2}>
               <Bus co2={busCO2} />
             </CustomTabPanel>
