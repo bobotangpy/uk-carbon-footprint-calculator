@@ -118,71 +118,67 @@ export default function Home() {
         Carbon Footprint Calculator
       </h1>
 
-      {loading ? (
-        <Loading />
-      ) : (
-        <div className="tabs-container">
-          <Box sx={{ width: "100%" }}>
-            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-              <Tabs
-                value={value}
-                onChange={handleChange}
-                aria-label="Carbon Footprint Calculator tabs"
-              >
-                <Tab
-                  label="Car"
-                  icon={<DirectionsCarIcon />}
-                  iconPosition="start"
-                  {...a11yProps(0)}
-                />
-                <Tab
-                  label="Flights"
-                  icon={<FlightIcon />}
-                  iconPosition="start"
-                  {...a11yProps(1)}
-                />
-                <Tab
-                  label="Bus"
-                  icon={<DirectionsBusIcon />}
-                  iconPosition="start"
-                  {...a11yProps(2)}
-                />
-                <Tab
-                  label="Train"
-                  icon={<TrainIcon />}
-                  iconPosition="start"
-                  {...a11yProps(3)}
-                />
-                <Tab
-                  label="Ferry"
-                  icon={<DirectionsBoatIcon />}
-                  iconPosition="start"
-                  {...a11yProps(4)}
-                />
-              </Tabs>
-            </Box>
-            <CustomTabPanel value={value} index={0}>
-              <Car2 co2={carCO2} />
-            </CustomTabPanel>
-            <CustomTabPanel value={value} index={1}>
-              <Flights4
-                co2={flightCO2}
-                airportList={airportList}
-                airportsDetails={airportsDetails}
+      <div className="tabs-container">
+        <Box sx={{ width: "100%" }}>
+          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+            <Tabs
+              value={value}
+              onChange={handleChange}
+              aria-label="Carbon Footprint Calculator tabs"
+            >
+              <Tab
+                label="Car"
+                icon={<DirectionsCarIcon />}
+                iconPosition="start"
+                {...a11yProps(0)}
               />
-            </CustomTabPanel>
-            <CustomTabPanel value={value} index={2}>
-              <Bus co2={busCO2} />
-            </CustomTabPanel>
-            <CustomTabPanel value={value} index={3}>
-              <Train trainStationsData={trainStationsData} />
-            </CustomTabPanel>
-            <CustomTabPanel value={value} index={4}>
-              <Ferry co2={ferryCO2} />
-            </CustomTabPanel>
+              <Tab
+                label="Flights"
+                icon={<FlightIcon />}
+                iconPosition="start"
+                {...a11yProps(1)}
+              />
+              <Tab
+                label="Bus"
+                icon={<DirectionsBusIcon />}
+                iconPosition="start"
+                {...a11yProps(2)}
+              />
+              <Tab
+                label="Train"
+                icon={<TrainIcon />}
+                iconPosition="start"
+                {...a11yProps(3)}
+              />
+              <Tab
+                label="Ferry"
+                icon={<DirectionsBoatIcon />}
+                iconPosition="start"
+                {...a11yProps(4)}
+              />
+            </Tabs>
           </Box>
-        </div>
-      )}
+          <CustomTabPanel value={value} index={0}>
+            <Car2 co2={carCO2} />
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={1}>
+            <Flights4
+              co2={flightCO2}
+              airportList={airportList}
+              airportsDetails={airportsDetails}
+            />
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={2}>
+            <Bus co2={busCO2} />
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={3}>
+            <Train trainStationsData={trainStationsData} />
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={4}>
+            <Ferry co2={ferryCO2} />
+          </CustomTabPanel>
+        </Box>
+      </div>
     </div>
   );
 }
